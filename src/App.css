@@ -1,0 +1,21 @@
+body {
+  background: url(https://media.istockphoto.com/id/962500712/video/4k-tl-cloudy-sky-with-sun-rays.jpg?s=640x640&k=20&c=XQrz-Y4FIzovVlayePLhPZpHoM8-iLN7gZ_uSdnoe-8=);
+  height: 100vh;
+  background-repeat: no-repeat;
+  background-size:cover;
+}
+
+.container{
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;
+flex-direction: column;
+}
+
+.weather-box{
+  border: 3px solid white;
+  padding: 50px;
+  border-radius: 30px;
+  background-color: azure;
+}
