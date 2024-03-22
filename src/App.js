@@ -28,8 +28,17 @@ function App() {
   };
 
   useEffect(() => {
-    getCurrentlocation();
-  }, []);
+    const fetchData = async () => {
+      try {
+        const position = await getCurrentlocation();
+        // 데이터 가져오는 로직
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [getCurrentlocation]); // getCurrentlocation을 종속성 배열에 추가
 
   return (
     <div>
