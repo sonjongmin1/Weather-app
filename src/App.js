@@ -3,6 +3,7 @@ import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import WeatherBox from "./component/WeatherBox";
 import WeatherButton from "./component/WeatherButton";
+import ClipLoader from "react-spinners/ClipLoader";
 //1. 앱이 실행되자마자 현재위치기반의 날씨가 보인다.
 //2. 날씨정보에는 도시, 섭씨 화씨 날씨상태
 //3. 5개의 버튼이 있다. (1개는 현재위치, 4개는 다른 도시)
@@ -12,7 +13,11 @@ import WeatherButton from "./component/WeatherButton";
 
 function App() {
   const [weather, setWeather] = useState(null);
-  const getCurrentlocation = () => {
+  const [city, setCity] = useState(false);
+  const [loading, setLoading] = useState("");
+  const cities = ["paris", "new york", "tokyo", "seoul"];
+
+  const getCurrentLocation = () => {
     navigator.geolocation.getCurrentPosition((position) => {
       let lat = position.coords.latitude;
       let lon = position.coords.longitude;
@@ -22,21 +27,45 @@ function App() {
 
   const getWeatherByCurrentLocation = async (lat, lon) => {
     let url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=36c7e8662756cdc79406a17b81f4940b&units=metric`;
+    setLoading(true);
     let response = await fetch(url);
     let data = await response.json();
     setWeather(data);
+    setLoading(false);
+  };
+
+  const getWeatherByCity = async () => {
+    let url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=36c7e8662756cdc79406a17b81f4940b&units=metric`;
+    setLoading(true);
+    let response = await fetch(url);
+    let data = await response.json();
+    console.log("Data", data);
+    setWeather(data);
+    setLoading(false);
   };
 
   useEffect(() => {
-    getCurrentlocation();
-  }, []);
+    if (city == "") {
+      getCurrentLocation();
+    } else {
+      getWeatherByCity();
+    }
+  }, [city]);
+
+  useEffect(() => {
+    console.log("city", city);
+  });
 
   return (
-    <div>
-      <div className="container">
-        <WeatherBox weather={weather} />
-        <WeatherButton />
-      </div>
+    <div className="container">
+      {loading ? (
+        <ClipLoader color="#f88c6b" loading={loading} size={150} />
+      ) : (
+        <div className="container">
+          <WeatherBox weather={weather} />
+          <WeatherButton cities={cities} setCity={setCity} />
+        </div>
+      )}
     </div>
   );
 }
