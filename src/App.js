@@ -45,6 +45,7 @@ function App() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     if (city === "") {
       getCurrentLocation();
     } else {
