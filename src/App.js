@@ -1,20 +1,14 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import WeatherBox from "./component/WeatherBox";
 import WeatherButton from "./component/WeatherButton";
 import ClipLoader from "react-spinners/ClipLoader";
-//1. 앱이 실행되자마자 현재위치기반의 날씨가 보인다.
-//2. 날씨정보에는 도시, 섭씨 화씨 날씨상태
-//3. 5개의 버튼이 있다. (1개는 현재위치, 4개는 다른 도시)
-//4. 도시버튼을 클릭할때 마다 도시별 날씨가 나온다.
-//5. 현재위치 버튼을 누르면 다시 현재위치 기반의 날씨가 나온다.
-//6. 데이터를 들고오는 동안 로딩 스피너가 돈다.
 
 function App() {
   const [weather, setWeather] = useState(null);
   const [city, setCity] = useState(false);
-  const [loading, setLoading] = useState("");
+  const [loading, setLoading] = useState(false);
   const cities = ["paris", "new york", "tokyo", "seoul"];
 
   const getCurrentLocation = () => {
@@ -25,36 +19,64 @@ function App() {
     });
   };
 
+  // try-catch를 이용한 API 호출 에러 핸들링을 추가한 함수
   const getWeatherByCurrentLocation = async (lat, lon) => {
     let url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=36c7e8662756cdc79406a17b81f4940b&units=metric`;
-    setLoading(true);
-    let response = await fetch(url);
-    let data = await response.json();
-    setWeather(data);
-    setLoading(false);
+
+    try {
+      setLoading(true);
+      let response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      let data = await response.json();
+      setWeather(data);
+    } catch (error) {
+      console.error("Error fetching weather data:", error.message);
+      // 에러가 발생하면 해당 도시의 날씨 정보를 null로 설정하여 에러를 핸들링합니다.
+      setWeather(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getWeatherByCity = async () => {
+  // try-catch를 이용한 API 호출 에러 핸들링을 추가한 함수
+  const getWeatherByCity = async (city) => {
     let url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=36c7e8662756cdc79406a17b81f4940b&units=metric`;
-    setLoading(true);
-    let response = await fetch(url);
-    let data = await response.json();
-    console.log("Data", data);
-    setWeather(data);
-    setLoading(false);
+
+    try {
+      setLoading(true);
+      let response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      let data = await response.json();
+      setWeather(data);
+    } catch (error) {
+      console.error("Error fetching weather data:", error.message);
+      // 에러가 발생하면 해당 도시의 날씨 정보를 null로 설정하여 에러를 핸들링합니다.
+      setWeather(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCityChange = (city) => {
+    if (city === "current") {
+      getCurrentLocation();
+      setCity(null);
+    } else {
+      setCity(city);
+    }
   };
 
   useEffect(() => {
-    if (city === "") {
+    if (!city) {
       getCurrentLocation();
     } else {
-      getWeatherByCity();
+      getWeatherByCity(city);
     }
   }, [city]);
-
-  useEffect(() => {
-    console.log("city", city);
-  });
 
   return (
     <div className="container">
@@ -62,8 +84,14 @@ function App() {
         <ClipLoader color="#f88c6b" loading={loading} size={150} />
       ) : (
         <div className="container">
+          {/* WeatherBox 컴포넌트에 현재 날씨 정보를 전달합니다. */}
           <WeatherBox weather={weather} />
-          <WeatherButton cities={cities} setCity={setCity} />
+          {/* WeatherButton 컴포넌트에 도시 목록과 도시 변경 핸들러를 전달합니다. */}
+          <WeatherButton
+            cities={cities}
+            handleCityChange={handleCityChange}
+            selectedCity={city}
+          />
         </div>
       )}
     </div>
